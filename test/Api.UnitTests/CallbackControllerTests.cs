@@ -1,6 +1,6 @@
-using System;
 using Api.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace Api.UnitTests
@@ -10,7 +10,9 @@ namespace Api.UnitTests
         [Fact]
         public void SutImplementsControllerBase()
         {
-            var sut = new CallbackController();
+            var trueLayerClient = new Mock<ITrueLayerDataApiClient>().Object;
+            var userService = new Mock<IUserService>().Object;
+            var sut = new CallbackController(trueLayerClient, userService);
             Assert.IsAssignableFrom<ControllerBase>(sut);
         }
     }
