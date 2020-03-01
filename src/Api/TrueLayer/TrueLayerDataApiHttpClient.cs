@@ -39,11 +39,16 @@ namespace Api.TrueLayer
             return await stream.ReadAsJson<AccessTokenResponse>();
         }
 
-        public async Task<ResourceCollection<Transaction>> GetAll(Guid userId, string accountId)
+        public async Task<ResourceCollection<Transaction>> GetAll(
+            Guid userId, 
+            string accountId, 
+            DateTimeOffset from, 
+            DateTimeOffset to)
         {
             var user = await _userService.GetById(userId);
 
             var uri = _settings.DataApiUrl + "/accounts/" + accountId + "/transactions";
+            uri += $"?from=${@from:yyyy-MM-dd}&to=${to:yyyy-MM-dd}";
             var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
             reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", user.AccessToken);
 
@@ -51,6 +56,28 @@ namespace Api.TrueLayer
             var stream = await response.Content.ReadAsStreamAsync();
             var content = await stream.ReadAsJson<TrueLayerResponse<TrueLayerTransaction>>();
             return new ResourceCollection<Transaction>(content.Results.Select(ToTransaction), content.Results.Count());
+        }
+
+        async Task<ResourceCollection<Transaction>> ITransactionReader.GetAll(
+            Guid userId, 
+            DateTimeOffset from, 
+            DateTimeOffset to)
+        {
+            var transactionCollections = new List<ResourceCollection<Transaction>>();
+            var accounts = await ((IAccountReader) this).GetAll(userId);
+            foreach (var account in accounts.Items)
+            {
+                var accountTransactions = await GetAll(userId, account.Id, from, to);
+                transactionCollections.Add(accountTransactions);
+            }
+
+            return transactionCollections.Aggregate(ResourceCollection<Transaction>.Empty(), (acc, curr) =>
+            {
+                var items = new List<Transaction>();
+                items.AddRange(acc.Items);
+                items.AddRange(curr.Items);
+                return new ResourceCollection<Transaction>(items, acc.Count + curr.Count);
+            });
         }
 
         private static Transaction ToTransaction(TrueLayerTransaction arg)
