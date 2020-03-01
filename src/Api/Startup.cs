@@ -1,6 +1,7 @@
+using Api.Application;
 using Api.Auth;
-using Api.Controllers;
 using Api.Persistence;
+using Api.TrueLayer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Api.TrueLayer
+namespace Api
 {
     public class Startup
     {

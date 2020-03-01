@@ -1,10 +1,10 @@
+using Api.Application;
 using Api.Controllers;
-using Api.TrueLayer;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace Api.TrueLayer.UnitTests
+namespace Api.UnitTests
 {
     public class CallbackControllerTests
     {

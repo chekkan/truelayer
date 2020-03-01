@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Api.Application;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,15 +31,6 @@ namespace Api.Controllers
             return StatusCode(StatusCodes.Status201Created,
                 new {message = "Saved the `access_token` successfully."});
         }
-    }
-
-    public interface IUserService
-    {
-        Task UpdateAccessToken(Guid userId, AccessTokenResponse accessToken);
-        Task<User> Authenticate(string username, string password);
-        Task<User> GetById(Guid userId);
-        Task<AuthCredential> GetAuthCredentials(Guid userId);
-        Task SaveCredential(Guid userId, AuthCredential credential);
     }
 
     public class AuthCredential
@@ -95,11 +87,7 @@ namespace Api.Controllers
     public class AccessTokenResponse
     {
         public string AccessToken { get; set; }
-
         public int ExpiresIn { get; set; }
-
-        public string TokenType { get; set; }
-
         public string RefreshToken { get; set; }
     }
 
