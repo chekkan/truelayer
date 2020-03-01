@@ -1,10 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Api.Application;
-using Api.Controllers;
 using Api.Persistence;
 using Microsoft.EntityFrameworkCore;
-using User = Api.Controllers.User;
 
 namespace Api.Auth
 {

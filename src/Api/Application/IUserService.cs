@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Api.Auth;
 using Api.Controllers;
 
 namespace Api.Application
