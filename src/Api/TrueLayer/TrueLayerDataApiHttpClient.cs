@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Api.Application;
 using Api.Auth;
 using Api.Common;
-using Api.Controllers;
 using Api.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;

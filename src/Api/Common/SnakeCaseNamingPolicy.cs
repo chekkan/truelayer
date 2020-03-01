@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Api.Controllers;
 
 namespace Api.Common
 {
