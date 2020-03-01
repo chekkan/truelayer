@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Api.Application;
+using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers

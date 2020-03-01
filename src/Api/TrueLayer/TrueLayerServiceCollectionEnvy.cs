@@ -1,3 +1,4 @@
+using Api.Application;
 using Api.Controllers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

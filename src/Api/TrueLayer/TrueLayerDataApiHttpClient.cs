@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Api.Application;
 using Api.Controllers;
 using Api.Models;
 using Microsoft.Extensions.Options;
