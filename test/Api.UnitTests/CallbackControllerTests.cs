@@ -1,4 +1,4 @@
-using Api.Controllers;
+using Api.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
