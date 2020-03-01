@@ -43,7 +43,28 @@ namespace Api.Auth
             var userDao = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == userId);
             return ToUser(userDao);
         }
-        
+
+        public async Task<AuthCredential> GetAuthCredentials(Guid userId)
+        {
+            var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == userId);
+            return new AuthCredential
+            {
+                AccessToken = user.AccessToken,
+                RefreshToken = user.RefreshToken,
+                ExpiresAt = user.AccessExpiresAt
+            };
+        }
+
+        public async Task SaveCredential(Guid userId, AuthCredential credential)
+        {
+            var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == userId);
+            user.AccessToken = credential.AccessToken;
+            user.AccessExpiresAt = credential.ExpiresAt;
+            user.RefreshToken = credential.RefreshToken;
+            _dbContext.Update(user);
+            await _dbContext.SaveChangesAsync();
+        }
+
         private static User ToUser(Api.Persistence.User userDao)
         {
             return userDao == null
@@ -51,8 +72,7 @@ namespace Api.Auth
                 : new User
                 {
                     Id = userDao.Id,
-                    Username = userDao.Username,
-                    AccessToken = userDao.AccessToken
+                    Username = userDao.Username
                 };
         }
     }

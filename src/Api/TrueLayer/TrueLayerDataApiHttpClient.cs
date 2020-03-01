@@ -40,17 +40,17 @@ namespace Api.TrueLayer
         }
 
         public async Task<ResourceCollection<Transaction>> GetAll(
-            Guid userId, 
-            string accountId, 
-            DateTimeOffset from, 
+            Guid userId,
+            string accountId,
+            DateTimeOffset from,
             DateTimeOffset to)
         {
-            var user = await _userService.GetById(userId);
+            var accessToken = await GetAccessTokenForUser(userId);
 
             var uri = _settings.DataApiUrl + "/accounts/" + accountId + "/transactions";
-            uri += $"?from=${@from:yyyy-MM-dd}&to=${to:yyyy-MM-dd}";
+            uri += $"?from={@from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
             var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-            reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", user.AccessToken);
+            reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await _httpClient.SendAsync(reqMessage, HttpCompletionOption.ResponseHeadersRead);
             var stream = await response.Content.ReadAsStreamAsync();
@@ -58,9 +58,43 @@ namespace Api.TrueLayer
             return new ResourceCollection<Transaction>(content.Results.Select(ToTransaction), content.Results.Count());
         }
 
+        private async Task<string> GetAccessTokenForUser(Guid userId)
+        {
+            var currCredential = await _userService.GetAuthCredentials(userId);
+
+            // is current access token expires with a minute
+            // request new access token
+            if (currCredential.ExpiresAt >= DateTime.Now.AddMinutes(1)) return currCredential.AccessToken;
+
+            currCredential = await RefreshToken(currCredential);
+            await _userService.SaveCredential(userId, currCredential);
+
+            return currCredential.AccessToken;
+        }
+
+        private async Task<AuthCredential> RefreshToken(AuthCredential credential)
+        {
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                new KeyValuePair<string, string>("client_id", _settings.ClientId),
+                new KeyValuePair<string, string>("client_secret", _settings.ClientSecret),
+                new KeyValuePair<string, string>("refresh_token", credential.RefreshToken)
+            });
+            var response = await _httpClient.PostAsync(_settings.AuthApiUrl + "/connect/token", formContent);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var accessToken = await stream.ReadAsJson<AccessTokenResponse>();
+            return new AuthCredential
+            {
+                AccessToken = accessToken.AccessToken,
+                ExpiresAt = DateTime.Now.AddSeconds(accessToken.ExpiresIn),
+                RefreshToken = accessToken.RefreshToken
+            };
+        }
+
         async Task<ResourceCollection<Transaction>> ITransactionReader.GetAll(
-            Guid userId, 
-            DateTimeOffset from, 
+            Guid userId,
+            DateTimeOffset from,
             DateTimeOffset to)
         {
             var transactionCollections = new List<ResourceCollection<Transaction>>();
@@ -98,11 +132,11 @@ namespace Api.TrueLayer
 
         public async Task<ResourceCollection<Account>> GetAll(Guid userId)
         {
-            var user = await _userService.GetById(userId);
+            var accessToken = await GetAccessTokenForUser(userId);
 
             var uri = _settings.DataApiUrl + "/accounts";
             var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-            reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", user.AccessToken);
+            reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await _httpClient.SendAsync(reqMessage, HttpCompletionOption.ResponseHeadersRead);
             var stream = await response.Content.ReadAsStreamAsync();

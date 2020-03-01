@@ -37,6 +37,15 @@ namespace Api.Controllers
         Task UpdateAccessToken(Guid userId, AccessTokenResponse accessToken);
         Task<User> Authenticate(string username, string password);
         Task<User> GetById(Guid userId);
+        Task<AuthCredential> GetAuthCredentials(Guid userId);
+        Task SaveCredential(Guid userId, AuthCredential credential);
+    }
+
+    public class AuthCredential
+    {
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime ExpiresAt { get; set; }
     }
 
     public interface ITrueLayerDataApiClient
@@ -81,7 +90,6 @@ namespace Api.Controllers
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
-        public string AccessToken { get; set; }
     }
 
     public class AccessTokenResponse
