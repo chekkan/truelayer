@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Api.Controllers;
 using Api.TrueLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
+using User = Api.Controllers.User;
 
 namespace Api.TrueLayer
 {

@@ -1,3 +1,4 @@
+using Api.Controllers;
 using Api.TrueLayer;
 using Api.TrueLayer.Persistence;
 using Microsoft.AspNetCore.Authentication;

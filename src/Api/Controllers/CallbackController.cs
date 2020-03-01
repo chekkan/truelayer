@@ -4,11 +4,12 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Api.TrueLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Api.TrueLayer
+namespace Api.Controllers
 {
     [Controller]
     public class CallbackController : ControllerBase

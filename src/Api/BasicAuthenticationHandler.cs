@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Api.Controllers;
 using Api.TrueLayer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
