@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Api.Application;
 using Api.Controllers;
 using Api.Models;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace Api.TrueLayer
@@ -15,14 +16,19 @@ namespace Api.TrueLayer
     {
         private readonly HttpClient _httpClient;
         private readonly IUserService _userService;
+        private readonly IMemoryCache _memoryCache;
         private readonly TrueLayerSettings _settings;
 
-        public TrueLayerDataApiHttpClient(IOptions<TrueLayerSettings> settingsOptions, HttpClient httpClient,
-            IUserService userService)
+        public TrueLayerDataApiHttpClient(
+            IOptions<TrueLayerSettings> settingsOptions, 
+            HttpClient httpClient,
+            IUserService userService,
+            IMemoryCache memoryCache)
         {
             _settings = settingsOptions.Value;
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
         }
 
         public async Task<AccessTokenResponse> GetAccessToken(string code)
@@ -50,13 +56,19 @@ namespace Api.TrueLayer
 
             var uri = $"{_settings.DataApiUrl}/accounts/{accountId}/transactions";
             uri += $"?from={@from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
-            var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-            reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            return await _memoryCache.GetOrCreateAsync(uri, async entry =>
+            {
+                entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                
+                var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+                reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var response = await _httpClient.SendAsync(reqMessage, HttpCompletionOption.ResponseHeadersRead);
-            var stream = await response.Content.ReadAsStreamAsync();
-            var content = await stream.ReadAsJson<TrueLayerResponse<TrueLayerTransaction>>();
-            return new ResourceCollection<Transaction>(content.Results.Select(ToTransaction), content.Results.Count());
+                var response = await _httpClient.SendAsync(reqMessage, HttpCompletionOption.ResponseHeadersRead);
+                var stream = await response.Content.ReadAsStreamAsync();
+                var content = await stream.ReadAsJson<TrueLayerResponse<TrueLayerTransaction>>();
+                return new ResourceCollection<Transaction>(content.Results.Select(ToTransaction),
+                    content.Results.Count());
+            });
         }
 
         private async Task<string> GetAccessTokenForUser(Guid userId)
