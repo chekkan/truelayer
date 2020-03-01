@@ -1,3 +1,4 @@
+using Api.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.TrueLayer.Persistence

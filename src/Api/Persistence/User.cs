@@ -1,6 +1,6 @@
 using System;
 
-namespace Api.TrueLayer.Persistence
+namespace Api.Persistence
 {
     public class User
     {
