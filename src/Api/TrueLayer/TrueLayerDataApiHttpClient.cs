@@ -114,6 +114,23 @@ namespace Api.TrueLayer
             });
         }
 
+        public async Task<IDictionary<string, decimal>> GetSummary(
+            Guid userId, 
+            DateTimeOffset from,
+            DateTimeOffset to)
+        {
+            var transactions = await ((ITransactionReader) this).GetAll(userId, from, to);
+            var result = transactions.Items
+                .Where(t => t.Type == "DEBIT")
+                .GroupBy(t => t.Category, CategorySum);
+            return new Dictionary<string, decimal>(result);
+        }
+
+        private static KeyValuePair<string, decimal> CategorySum(string category, IEnumerable<Transaction> items)
+        {
+            return new KeyValuePair<string, decimal>(category, items.Sum(x => x.Amount));
+        }
+
         private static Transaction ToTransaction(TrueLayerTransaction arg)
         {
             return new Transaction

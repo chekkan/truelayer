@@ -43,5 +43,15 @@ namespace Api.Controllers
             Response.Headers["X-Total-Count"] = transactions.Count.ToString();
             return Ok(transactions.Items);
         }
+
+        [HttpGet("_summary")]
+        public async Task<IActionResult> GetSummary()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var from = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(7));
+            var to = DateTimeOffset.UtcNow;
+            var summary = await _transactionReader.GetSummary(new Guid(userId), from, to);
+            return Ok(summary);
+        }
     }
 }
