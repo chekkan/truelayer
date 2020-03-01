@@ -47,7 +47,7 @@ namespace Api.TrueLayer
         {
             var accessToken = await GetAccessTokenForUser(userId);
 
-            var uri = _settings.DataApiUrl + "/accounts/" + accountId + "/transactions";
+            var uri = $"{_settings.DataApiUrl}/accounts/{accountId}/transactions";
             uri += $"?from={@from:yyyy-MM-dd}&to={to:yyyy-MM-dd}";
             var reqMessage = new HttpRequestMessage(HttpMethod.Get, uri);
             reqMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -155,42 +155,5 @@ namespace Api.TrueLayer
                 Type = arg.AccountType
             };
         }
-    }
-
-    public class TrueLayerAccount
-    {
-        public string AccountId { get; set; }
-
-        public string AccountType { get; set; }
-
-        public string DisplayName { get; set; }
-
-        public string Currency { get; set; }
-
-        public AccountProvider Provider { get; set; }
-
-        public class AccountProvider
-        {
-            public string DisplayName { get; set; }
-            public string ProviderId { get; set; }
-        }
-    }
-
-    public class TrueLayerTransaction
-    {
-        public string TransactionId { get; set; }
-        public DateTimeOffset Timestamp { get; set; }
-        public string Description { get; set; }
-        public decimal Amount { get; set; }
-        public string Currency { get; set; }
-        public string TransactionType { get; set; }
-        public string TransactionCategory { get; set; }
-        public string MerchantName { get; set; }
-        public IEnumerable<string> TransactionClassification { get; set; }
-    }
-
-    public class TrueLayerResponse<T>
-    {
-        public IEnumerable<T> Results { get; set; }
     }
 }
