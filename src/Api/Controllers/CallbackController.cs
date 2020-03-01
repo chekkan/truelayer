@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Api.TrueLayer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Api.Controllers
 {
@@ -28,16 +25,18 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Callback([FromForm] CallbackBodyDto body)
         {
-            await _userService.UpdateAuthCode(new Guid(body.State), body.Code, body.Scope);
+            var accessToken = await _trueLayerDataApiClient.GetAccessToken(body.Code);
+            await _userService.UpdateAccessToken(new Guid(body.State), accessToken);
             return StatusCode(StatusCodes.Status201Created,
-                new {message = "Saved the `code` and `scope` successfully."});
+                new {message = "Saved the `access_token` successfully."});
         }
     }
 
     public interface IUserService
     {
-        Task UpdateAuthCode(Guid userId, string code, string scope);
+        Task UpdateAccessToken(Guid userId, AccessTokenResponse accessToken);
         Task<User> Authenticate(string username, string password);
+        Task<User> GetById(Guid userId);
     }
 
     public interface ITrueLayerDataApiClient
@@ -45,38 +44,36 @@ namespace Api.Controllers
         Task<AccessTokenResponse> GetAccessToken(string code);
     }
 
-    public class TrueLayerDataApiHttpClient : ITrueLayerDataApiClient
-    {
-        private readonly HttpClient _httpClient;
-        private readonly TrueLayerSettings _settings;
-
-        public TrueLayerDataApiHttpClient(IOptions<TrueLayerSettings> settingsOptions, HttpClient httpClient)
-        {
-            _settings = settingsOptions.Value;
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        }
-
-        public async Task<AccessTokenResponse> GetAccessToken(string code)
-        {
-            var formContent = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("client_id", _settings.ClientId),
-                new KeyValuePair<string, string>("client_secret", _settings.ClientSecret),
-                new KeyValuePair<string, string>("redirect_uri", _settings.RedirectPage),
-                new KeyValuePair<string, string>("code", code),
-            });
-            var response = await _httpClient.PostAsync(_settings.AuthApiUrl + "/connect/token", formContent);
-            var stream = await response.Content.ReadAsStreamAsync();
-            return await stream.ReadAsJson<AccessTokenResponse>();
-        }
-    }
-
     public static class StreamExtension
     {
         public static ValueTask<T> ReadAsJson<T>(this Stream stream)
         {
-            return JsonSerializer.DeserializeAsync<T>(stream);
+            return JsonSerializer.DeserializeAsync<T>(stream, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = new SnakeCaseNamingPolicy() 
+            });
+        }
+    }
+
+    public class SnakeCaseNamingPolicy : JsonNamingPolicy
+    {
+        public override string ConvertName(string name)
+        {
+            return name.ToSnakeCase();
+        }
+    }
+
+    public static class StringUtils
+    {
+        public static string ToSnakeCase(this string str)
+        {
+            return string.Concat(
+                str.Select(
+                    (x, i) => i > 0 && char.IsUpper(x)
+                        ? "_" + x
+                        : x.ToString()
+                )
+            ).ToLower();
         }
     }
 
@@ -84,13 +81,14 @@ namespace Api.Controllers
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
+        public string AccessToken { get; set; }
     }
 
     public class AccessTokenResponse
     {
         public string AccessToken { get; set; }
 
-        public string ExpiresIn { get; set; }
+        public int ExpiresIn { get; set; }
 
         public string TokenType { get; set; }
 
@@ -100,7 +98,9 @@ namespace Api.Controllers
     public class CallbackBodyDto
     {
         public string Code { get; set; }
+
         public string Scope { get; set; }
+
         // State contains the user id the code is for
         public string State { get; set; }
     }

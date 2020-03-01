@@ -29,7 +29,7 @@ namespace Api.Controllers
                                                      "?response_type=code" +
                                                      "&response_mode=form_post" +
                                                      "&client_id=" + _settings.ClientId +
-                                                     "&scope=transactions" +
+                                                     "&scope=offline_access transactions accounts" +
                                                      "&redirect_uri=" + _settings.RedirectPage +
                                                      "&provider_id=" + id +
                                                      "&providers=" + _settings.Providers +

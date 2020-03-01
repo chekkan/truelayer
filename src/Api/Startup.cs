@@ -1,3 +1,4 @@
+using Api.Auth;
 using Api.Controllers;
 using Api.TrueLayer;
 using Api.TrueLayer.Persistence;

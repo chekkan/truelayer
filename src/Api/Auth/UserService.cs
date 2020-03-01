@@ -5,7 +5,7 @@ using Api.TrueLayer.Persistence;
 using Microsoft.EntityFrameworkCore;
 using User = Api.Controllers.User;
 
-namespace Api.TrueLayer
+namespace Api.Auth
 {
     public class UserService : IUserService
     {
@@ -16,14 +16,16 @@ namespace Api.TrueLayer
             _dbContext = dbContext;
         }
 
-        public async Task UpdateAuthCode(Guid userId, string code, string scope)
+        public async Task UpdateAccessToken(Guid userId, AccessTokenResponse accessToken)
         {
             var userDao = await _dbContext.Users
                 .SingleOrDefaultAsync(u => u.Id == userId);
             if (userDao == null)
                 return;
 
-            userDao.AuthCode = code;
+            userDao.AccessToken = accessToken.AccessToken;
+            userDao.RefreshToken = accessToken.RefreshToken;
+            userDao.AccessExpiresAt = DateTime.UtcNow.AddSeconds(accessToken.ExpiresIn);
 
             _dbContext.Update(userDao);
             await _dbContext.SaveChangesAsync();
@@ -33,13 +35,25 @@ namespace Api.TrueLayer
         {
             var userDao = await _dbContext.Users
                 .SingleOrDefaultAsync(u => u.Username == username && u.Password == password);
-            if (userDao == null)
-                return null;
-            return new User
-            {
-                Id = userDao.Id,
-                Username = userDao.Username
-            };
+            return ToUser(userDao);
+        }
+
+        public async Task<User> GetById(Guid userId)
+        {
+            var userDao = await _dbContext.Users.SingleOrDefaultAsync(u => u.Id == userId);
+            return ToUser(userDao);
+        }
+        
+        private static User ToUser(Api.Persistence.User userDao)
+        {
+            return userDao == null
+                ? null
+                : new User
+                {
+                    Id = userDao.Id,
+                    Username = userDao.Username,
+                    AccessToken = userDao.AccessToken
+                };
         }
     }
 }
