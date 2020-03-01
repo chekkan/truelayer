@@ -1,9 +1,8 @@
 using System;
-using Api.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Api
+namespace Api.TrueLayer
 {
     public static class TrueLayerServiceCollectionEnvy
     {

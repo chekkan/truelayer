@@ -1,12 +1,14 @@
-using Api.Auth;
+using Api.TrueLayer;
+using Api.TrueLayer.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Api
+namespace Api.TrueLayer
 {
     public class Startup
     {
@@ -25,6 +27,8 @@ namespace Api
             services.AddControllers();
             services.AddAuthentication("Basic")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
+            services.AddDbContext<PaymentsChallengeContext>(
+                builder => builder.UseSqlite(Configuration.GetConnectionString("Default")));
             services.AddTrueLayer(Configuration);
             services.AddTransient<IUserService, UserService>();
         }
@@ -36,7 +40,7 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();

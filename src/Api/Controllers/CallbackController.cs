@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Api.Auth
+namespace Api.TrueLayer
 {
     [Controller]
     public class CallbackController : ControllerBase
@@ -27,7 +27,7 @@ namespace Api.Auth
         [HttpPost]
         public async Task<IActionResult> Callback([FromForm] CallbackBodyDto body)
         {
-            await _userService.UpdateAuthCode(body.State, body.Code, body.Scope);
+            await _userService.UpdateAuthCode(new Guid(body.State), body.Code, body.Scope);
             return StatusCode(StatusCodes.Status201Created,
                 new {message = "Saved the `code` and `scope` successfully."});
         }
@@ -35,7 +35,7 @@ namespace Api.Auth
 
     public interface IUserService
     {
-        Task UpdateAuthCode(string userId, string code, string scope);
+        Task UpdateAuthCode(Guid userId, string code, string scope);
         Task<User> Authenticate(string username, string password);
     }
 
@@ -71,32 +71,12 @@ namespace Api.Auth
         }
     }
 
-    public class TrueLayerSettings
-    {
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string AuthApiUrl { get; set; }
-        public string RedirectPage { get; set; }
-    }
-
     public static class StreamExtension
     {
         public static ValueTask<T> ReadAsJson<T>(this Stream stream)
         {
             return JsonSerializer.DeserializeAsync<T>(stream);
         }
-    }
-
-    public class TrueLayerUser
-    {
-        public string FullName { get; set; }
-        public DateTimeOffset DateOfBirth { get; set; }
-        public IEnumerable<string> Emails { get; set; }
-    }
-
-    public class TrueLayerResponse<T>
-    {
-        public IEnumerable<T> Results { get; set; }
     }
 
     public class User

@@ -1,9 +1,9 @@
-using Api.Auth;
+using Api.TrueLayer;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace Api.UnitTests
+namespace Api.TrueLayer.UnitTests
 {
     public class CallbackControllerTests
     {
