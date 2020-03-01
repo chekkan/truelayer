@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
-namespace Api.TrueLayer.Controllers
+namespace Api.Controllers
 {
     [Route("v1/providers")]
     [Controller]
