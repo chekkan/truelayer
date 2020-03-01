@@ -1,10 +1,9 @@
 using System;
-using Api.TrueLayer.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Api.TrueLayer
+namespace Api.Persistence
 {
     public static class DatabaseMigration
     {

@@ -1,8 +1,7 @@
 using System;
-using Api.Persistence;
-using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
 
-namespace Api.TrueLayer.Persistence
+namespace Api.Persistence
 {
     public static class DbInitializer
     {

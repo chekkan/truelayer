@@ -1,7 +1,6 @@
 using Api.Auth;
 using Api.Controllers;
-using Api.TrueLayer;
-using Api.TrueLayer.Persistence;
+using Api.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

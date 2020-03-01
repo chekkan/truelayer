@@ -1,7 +1,6 @@
-using Api.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.TrueLayer.Persistence
+namespace Api.Persistence
 {
     public class PaymentsChallengeContext : DbContext
     {
