@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Application;
@@ -21,7 +22,9 @@ namespace Api.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactions(
-            [FromQuery] DateTimeOffset? from, [FromQuery] DateTimeOffset? to)
+            [FromQuery] DateTimeOffset? from, [FromQuery] DateTimeOffset? to,
+            [FromQuery(Name = "_page")] int page = 1,
+            [FromQuery(Name = "_size")] int size = int.MaxValue)
         {
             if (!to.HasValue)
             {
@@ -43,7 +46,7 @@ namespace Api.Controllers
             var transactions = await _transactionReader
                 .GetAll(new Guid(userId), from.Value, to.Value);
             Response.Headers["X-Total-Count"] = transactions.Count.ToString();
-            return Ok(transactions.Items);
+            return Ok(transactions.Items.Skip((page - 1) * size).Take(size));
         }
 
         [HttpGet("_summary")]
