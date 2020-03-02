@@ -33,8 +33,8 @@ Use Basic Authentication in order to perform the following operations
 1. Connect a bank account with user
 
 	```console
-	curl -I --request POST 'https://localhost:5001/v1/providers/mock/connect' \ 
---header 'Authorization: Basic am9objpkb2U=' --header 'Content-Length: 0'
+	curl -I --request POST 'https://localhost:5001/v1/providers/mock/connect' \
+	--header 'Authorization: Basic am9objpkb2U=' --header 'Content-Length: 0'
 	```
 
 	**Note**
